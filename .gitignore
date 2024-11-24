@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+ChromaDB/db/
+ChromaDB/__pycache__/
+
+*.pyc
+.DS_Store
+data/
+
+.venv
+.env
+
+output/*
+cost_breakdown/API Cost.csv
+cost_breakdown/API Cost.xlsx
+cost_breakdown/__pycache__
+
+# Streamlit
+.streamlit/secrets.toml
