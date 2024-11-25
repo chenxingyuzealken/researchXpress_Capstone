@@ -91,16 +91,18 @@ sys.path.append(analysisDirectory)
 
 # Patch the method
 from langchain.chat_models import ChatOpenAI
-# Helper function to recursively convert OpenAIObject to standard Python types
-def convert_openai_object(obj):
-    if hasattr(obj, "__dict__"):
-        return {k: convert_openai_object(v) for k, v in obj.__dict__.items()}
-    elif isinstance(obj, list):
-        return [convert_openai_object(item) for item in obj]
-    elif isinstance(obj, dict):
-        return {k: convert_openai_object(v) for k, v in obj.items()}
+from langchain.schema import LLMResult
+
+# Helper function to safely convert complex objects to standard types
+def convert_to_standard_type(value):
+    if hasattr(value, "__dict__"):
+        return {k: convert_to_standard_type(v) for k, v in value.__dict__.items()}
+    elif isinstance(value, list):
+        return [convert_to_standard_type(item) for item in value]
+    elif isinstance(value, dict):
+        return {k: convert_to_standard_type(v) for k, v in value.items()}
     else:
-        return obj
+        return value
 
 # Override the `_combine_llm_outputs` method
 def patched_combine_llm_outputs(self, llm_outputs):
@@ -109,19 +111,21 @@ def patched_combine_llm_outputs(self, llm_outputs):
         token_usage = output.get("token_usage", None)
         if token_usage is not None:
             for k, v in token_usage.items():
+                # Convert both key and value to standard types if needed
+                k = convert_to_standard_type(k)
+                v = convert_to_standard_type(v)
                 if k in overall_token_usage:
-                    overall_token_usage[k] = (
-                        dict(overall_token_usage[k])
-                        if isinstance(overall_token_usage[k], OpenAIObject)
-                        else overall_token_usage[k]
-                    )
-                    v = dict(v) if isinstance(v, OpenAIObject) else v
-                    overall_token_usage[k] += v
+                    # Safely add values if they are numerical, else skip
+                    try:
+                        overall_token_usage[k] += v
+                    except TypeError:
+                        # Handle non-numeric types gracefully
+                        pass
                 else:
-                    overall_token_usage[k] = convert_openai_object(v)
+                    overall_token_usage[k] = v
     return {"token_usage": overall_token_usage}
 
-# Patch the method
+# Patch the method in ChatOpenAI
 ChatOpenAI._combine_llm_outputs = patched_combine_llm_outputs
 
 # Function to get common themes
