@@ -4,9 +4,7 @@ import pandas as pd
 from langchain.callbacks import get_openai_callback
 import time
 
-output_dir = "output"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+
 
 # Build path from working directory and add to system paths to facilitate local module import
 import os, sys
@@ -14,6 +12,11 @@ sys.path.append(os.path.join(os.getcwd(), "ChromaDB"))
 sys.path.append(os.path.join(os.getcwd(), "analysis"))
 sys.path.append(os.path.join(os.getcwd(), "cost_breakdown"))
 sys.path.append(os.path.join(os.getcwd(), "Miscellaneous"))
+
+output_dir = "output"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
 
 from chromaUtils import getCollection, getDistinctFileNameList, getListOfCollection
 from Freeform_Analysis import get_llm_response, parse_source_docs, get_pdf_analysis_table

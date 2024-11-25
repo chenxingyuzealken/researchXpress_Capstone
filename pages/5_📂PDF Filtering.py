@@ -5,10 +5,6 @@ from streamlit_extras.app_logo import add_logo
 import time
 from langchain.callbacks import get_openai_callback
 
-output_dir = "output"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
 import sys, os
 workingDirectory = os.getcwd()
 dataDirectory = os.path.join(workingDirectory, "data")
@@ -26,6 +22,11 @@ dirs = [
 ]
 for d in dirs:
     if d not in sys.path: sys.path.append(d)
+
+
+output_dir = "output"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 import chromaUtils
 from ingestPdf import copyCollection
