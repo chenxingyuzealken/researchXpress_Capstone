@@ -169,7 +169,8 @@ if not st.session_state.pdf_filtered:
                     print(f'Time taken in hours minutes and seconds is {time_taken_hours_minute_seconds}')
                     st.success(f'Successful! Time taken: {time_taken_hours_minute_seconds}')
 
-                    st.experimental_rerun()
+                    #st.experimental_rerun() # refreshes the page
+                    st.rerun() # refreshes the page
         else:
            st.error(err_messages[err_code]) 
 
