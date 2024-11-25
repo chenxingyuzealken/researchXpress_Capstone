@@ -4,6 +4,10 @@ import pandas as pd
 from langchain.callbacks import get_openai_callback
 import time
 
+output_dir = "output"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
 # Build path from working directory and add to system paths to facilitate local module import
 import os, sys
 sys.path.append(os.path.join(os.getcwd(), "ChromaDB"))
