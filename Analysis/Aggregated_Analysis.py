@@ -104,52 +104,68 @@ def convert_openai_object(obj):
 
 
 def get_common_themes(df, llm):
+    from langchain.schema import BaseOutputParser
+
+    # Helper function to convert OpenAIObject to standard types
+    def convert_openai_object(obj):
+        if hasattr(obj, "__dict__"):
+            return {k: convert_openai_object(v) for k, v in obj.__dict__.items()}
+        elif isinstance(obj, list):
+            return [convert_openai_object(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {k: convert_openai_object(v) for k, v in obj.items()}
+        else:
+            return obj
+
+    # Filter relevant rows and convert to Document objects
     df = df[df["Answer"].str.lower() == "yes"]
     docs = df['Findings'].apply(lambda x: Document(page_content=x[4:])).tolist()
 
+    # Initialize the chains and prompts
+    map_template = """The following is a set of documents
+    {docs}
+    Based on this list of docs, please identify the main themes'
+    Helpful Answer:"""
+    map_prompt = PromptTemplate.from_template(map_template)
+    map_chain = LLMChain(llm=llm, prompt=map_prompt)
+
+    reduce_template = """The following is set of summaries:
+    {doc_summaries}
+    Take these and distill it into a final, consolidated summary of the main themes'. 
+    Helpful Answer:"""
+    reduce_prompt = PromptTemplate.from_template(reduce_template)
+    reduce_chain = LLMChain(llm=llm, prompt=reduce_prompt)
+
+    combine_documents_chain = StuffDocumentsChain(
+        llm_chain=reduce_chain, document_variable_name="doc_summaries"
+    )
+
+    reduce_documents_chain = ReduceDocumentsChain(
+        combine_documents_chain=combine_documents_chain,
+        collapse_documents_chain=combine_documents_chain,
+        token_max=4000,
+    )
+
+    map_reduce_chain = MapReduceDocumentsChain(
+        llm_chain=map_chain,
+        reduce_documents_chain=reduce_documents_chain,
+        document_variable_name="docs",
+        return_intermediate_steps=False,
+    )
+
+    # Invoke the chain and handle OpenAIObject outputs
     with get_openai_callback() as usage_info:
-        map_template = """The following is a set of documents
-        {docs}
-        Based on this list of docs, please identify the main themes'
-        Helpful Answer:"""
-        map_prompt = PromptTemplate.from_template(map_template)
-        map_chain = LLMChain(llm=llm, prompt=map_prompt)
-
-        reduce_template = """The following is set of summaries:
-        {doc_summaries}
-        Take these and distill it into a final, consolidated summary of the main themes'. 
-        Helpful Answer:"""
-        reduce_prompt = PromptTemplate.from_template(reduce_template)
-        reduce_chain = LLMChain(llm=llm, prompt=reduce_prompt)
-        
-        combine_documents_chain = StuffDocumentsChain(
-            llm_chain=reduce_chain, document_variable_name="doc_summaries"
-        )
-
-        reduce_documents_chain = ReduceDocumentsChain(
-            combine_documents_chain=combine_documents_chain,
-            collapse_documents_chain=combine_documents_chain,
-            token_max=4000,
-        )
-
-        map_reduce_chain = MapReduceDocumentsChain(
-            llm_chain=map_chain,
-            reduce_documents_chain=reduce_documents_chain,
-            document_variable_name="docs",
-            return_intermediate_steps=False,
-        )
-
-        # Invoke the chain and handle OpenAIObject outputs
-        result = map_reduce_chain.invoke({"input_documents": docs})
-
-        # Convert OpenAIObject to standard Python types
-        if isinstance(result, BaseOutputParser):
+        try:
+            result = map_reduce_chain.invoke({"input_documents": docs})
+            # Convert OpenAIObject outputs to standard Python types
             result = convert_openai_object(result)
+        except TypeError as e:
+            print(f"Error encountered: {e}")
+            raise
 
         total_input_tokens = usage_info.prompt_tokens
         total_output_tokens = usage_info.completion_tokens
         total_cost = usage_info.total_cost
-
         print(result, total_input_tokens, total_output_tokens, total_cost)
         update_usage_logs(Stage.AGG_ANALYSIS.value, "N/A", total_input_tokens, total_output_tokens, total_cost)
 
