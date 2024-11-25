@@ -124,7 +124,8 @@ if not st.session_state.filtered:
 
 
                     st.session_state.filtered = input
-                    st.experimental_rerun()
+                    #st.experimental_rerun()
+                    st.rerun()
             # Excel Format is not valid
             else:
                 st.error('Wrong Excel Format: "TITLE", "ABSTRACT", "DOI" Columns Required')
