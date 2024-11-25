@@ -89,10 +89,10 @@ sys.path.append(analysisDirectory)
 
 #     return common_themes
 
+# Patch the method
+from langchain.chat_models import ChatOpenAI
+# Helper function to recursively convert OpenAIObject to standard Python types
 def convert_openai_object(obj):
-    """
-    Recursively convert OpenAIObject to Python standard types.
-    """
     if hasattr(obj, "__dict__"):
         return {k: convert_openai_object(v) for k, v in obj.__dict__.items()}
     elif isinstance(obj, list):
@@ -101,7 +101,6 @@ def convert_openai_object(obj):
         return {k: convert_openai_object(v) for k, v in obj.items()}
     else:
         return obj
-
 
 # Override the `_combine_llm_outputs` method
 def patched_combine_llm_outputs(self, llm_outputs):
@@ -123,8 +122,7 @@ def patched_combine_llm_outputs(self, llm_outputs):
     return {"token_usage": overall_token_usage}
 
 # Patch the method
-from langchain_community.chat_models.openai import OpenAI
-OpenAI._combine_llm_outputs = patched_combine_llm_outputs
+ChatOpenAI._combine_llm_outputs = patched_combine_llm_outputs
 
 # Function to get common themes
 def get_common_themes(df, llm):
