@@ -34,12 +34,17 @@ st.set_page_config(layout="centered")
 
 
 # Main Streamlit App
-if check_credentials():
-    st.success("✅ Access granted!")
-    # Add your main app logic here.
-    st.write("Welcome to the app!")
-else:
-    st.warning("Please provide the correct credentials to proceed.")
+# Check credentials and update session state
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False  # Default to False
+
+if not st.session_state.authenticated:
+    if check_credentials():
+        st.session_state.authenticated = True
+        st.success("✅ Access granted!")
+    else:
+        st.warning("Please provide the correct credentials to proceed.")
+        st.stop()  # Stop further execution if not authenticated
 
     
 
