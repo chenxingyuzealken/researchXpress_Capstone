@@ -195,4 +195,5 @@ else:
     reupload_button = st.button('Reupload another prompt and excel file')
     if reupload_button:
         st.session_state.filtered = False
-        st.experimental_rerun()
+        #st.experimental_rerun()
+        st.rerun()
