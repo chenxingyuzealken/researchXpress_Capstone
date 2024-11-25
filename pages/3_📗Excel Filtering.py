@@ -111,7 +111,18 @@ if not st.session_state.filtered:
                     update_usage_logs(Stage.EXCEL_FILTERING.value, corrected_input, total_input_tokens,total_output_tokens,total_cost)
                     dfOut = pd.DataFrame(results, columns = ["DOI","TITLE","ABSTRACT","LLM OUTPUT", "jsonOutput"])
                     dfOut = getOutputDF(dfOut)
-                    dfOut.to_excel("output/excel_result.xlsx", index=False)
+
+                    #dfOut.to_excel("output/excel_result.xlsx", index=False)
+                    # Ensure the 'output' directory exists
+                    output_dir = "output"
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+
+                    # Save the Excel file
+                    dfOut.to_excel(f"{output_dir}/excel_result.xlsx", index=False)
+
+
+
                     st.session_state.filtered = input
                     st.experimental_rerun()
             # Excel Format is not valid
@@ -120,6 +131,7 @@ if not st.session_state.filtered:
       
 
 else:
+    output_dir = "output"
     st.subheader("Prompt")
     st.markdown(st.session_state.filtered)
 
@@ -128,7 +140,7 @@ else:
 
     st.subheader("Results")
     
-    df = pd.read_excel("output/excel_result.xlsx")
+    df = pd.read_excel(f"{output_dir}/excel_result.xlsx")
     
     # Summary visualisations (in the form of cards)
     num_relevant_articles = len(getYesExcel(df))
@@ -175,7 +187,7 @@ else:
     st.session_state.excel_filter_fig1 = fig
 
     # Download Button
-    with open("output/excel_result.xlsx", 'rb') as my_file:
+    with open(f"{output_dir}/excel_result.xlsx", 'rb') as my_file:
         st.download_button(label = 'Download Excel', data = my_file, file_name='results.xlsx', mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') 
         
     st.plotly_chart(st.session_state.excel_filter_fig1, use_container_width=True)
