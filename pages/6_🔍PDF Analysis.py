@@ -163,7 +163,8 @@ if not st.session_state.pdf_analysis_prompt:
 
                         st.session_state.pdf_analysis_prompt = input
                         st.session_state.pdf_analysis_collection = input_collection_name
-                        st.experimental_rerun()
+                         #st.experimental_rerun() # refreshes the page
+                        st.rerun() # refreshes the page
                 else:
                     st.error("You have no PDF articles in this collection")
             else:
