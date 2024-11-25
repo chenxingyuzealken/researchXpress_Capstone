@@ -103,25 +103,34 @@ def convert_openai_object(obj):
         return obj
 
 
+# Override the `_combine_llm_outputs` method
+def patched_combine_llm_outputs(self, llm_outputs):
+    overall_token_usage = {}
+    for output in llm_outputs:
+        token_usage = output.get("token_usage", None)
+        if token_usage is not None:
+            for k, v in token_usage.items():
+                if k in overall_token_usage:
+                    overall_token_usage[k] = (
+                        dict(overall_token_usage[k])
+                        if isinstance(overall_token_usage[k], OpenAIObject)
+                        else overall_token_usage[k]
+                    )
+                    v = dict(v) if isinstance(v, OpenAIObject) else v
+                    overall_token_usage[k] += v
+                else:
+                    overall_token_usage[k] = convert_openai_object(v)
+    return {"token_usage": overall_token_usage}
+
+# Patch the method
+from langchain_community.chat_models.openai import OpenAI
+OpenAI._combine_llm_outputs = patched_combine_llm_outputs
+
+# Function to get common themes
 def get_common_themes(df, llm):
-    from langchain.schema import BaseOutputParser
-
-    # Helper function to convert OpenAIObject to standard types
-    def convert_openai_object(obj):
-        if hasattr(obj, "__dict__"):
-            return {k: convert_openai_object(v) for k, v in obj.__dict__.items()}
-        elif isinstance(obj, list):
-            return [convert_openai_object(item) for item in obj]
-        elif isinstance(obj, dict):
-            return {k: convert_openai_object(v) for k, v in obj.items()}
-        else:
-            return obj
-
-    # Filter relevant rows and convert to Document objects
     df = df[df["Answer"].str.lower() == "yes"]
     docs = df['Findings'].apply(lambda x: Document(page_content=x[4:])).tolist()
 
-    # Initialize the chains and prompts
     map_template = """The following is a set of documents
     {docs}
     Based on this list of docs, please identify the main themes'
@@ -153,22 +162,14 @@ def get_common_themes(df, llm):
         return_intermediate_steps=False,
     )
 
-    # Invoke the chain and handle OpenAIObject outputs
     with get_openai_callback() as usage_info:
-        try:
-            result = map_reduce_chain.invoke({"input_documents": docs})
-            # Convert OpenAIObject outputs to standard Python types
-            result = convert_openai_object(result)
-        except TypeError as e:
-            print(f"Error encountered: {e}")
-            raise
+        result = map_reduce_chain.invoke({"input_documents": docs})
 
         total_input_tokens = usage_info.prompt_tokens
         total_output_tokens = usage_info.completion_tokens
         total_cost = usage_info.total_cost
-        print(result, total_input_tokens, total_output_tokens, total_cost)
-        update_usage_logs(Stage.AGG_ANALYSIS.value, "N/A", total_input_tokens, total_output_tokens, total_cost)
 
+        print(result, total_input_tokens, total_output_tokens, total_cost)
         return result
 
 
