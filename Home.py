@@ -6,6 +6,13 @@ from streamlit_lottie import st_lottie
 from streamlit_extras.switch_page_button import switch_page
 import pandas as pd
 
+
+
+#adding to make it work on streamlit community
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 # Create API.xlsx if not present
 import sys, os
 workingDirectory = os.getcwd()
