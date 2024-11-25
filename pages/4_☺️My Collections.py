@@ -177,4 +177,5 @@ if st.session_state['create_but']: # if user clicks on the upload button
             elif full_path.lower().endswith('.pdf'):
                 os.remove(full_path)  
 
-        st.experimental_rerun() # refreshes the page
+        #st.experimental_rerun() # refreshes the page
+        st.rerun() # refreshes the page

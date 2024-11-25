@@ -232,4 +232,5 @@ if st.session_state.pdf_filtered:
     reupload_button = st.button('Ask another question')
     if reupload_button:
         st.session_state.pdf_filtered = False
-        st.experimental_rerun()
+        #st.experimental_rerun() # refreshes the page
+        st.rerun() # refreshes the page
