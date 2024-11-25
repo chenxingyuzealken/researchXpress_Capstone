@@ -65,7 +65,10 @@ def get_common_themes(df, llm):
             return_intermediate_steps=False,
         )
 
-        result = map_reduce_chain.run(docs)
+        #result = map_reduce_chain.run(docs)
+        result  = map_reduce_chain.invoke({"input_documents": docs})
+
+
         total_input_tokens = usage_info.prompt_tokens
         total_output_tokens = usage_info.completion_tokens
         total_cost = usage_info.total_cost
