@@ -66,9 +66,24 @@ st.subheader("Create Collection")
 st.markdown('#') 
 # End Header
 
+st.write("
+        Collection Name format MUST satisfy the following format:\n
+        - The length of the name must be between 3 and 63 characters.\n
+        - The name must start and end with a lowercase letter or a digit, and it can contain dots, dashes, and underscores in between.\n
+        - The name must not contain two consecutive dots.\n
+        - The name must not be a valid IP address.
+         ")
+st.markdown('#') 
+
 # Create text input field for naming collection
 collection_name = st.text_input("Name of new Collection", placeholder='e.g. psychological-first-aid')
 st.markdown('##')
+
+st.write("
+        Put your pdf files in a folder and zip them up. I don't recommend doing it around 50 pdf per zip file. This is in case your internet craps out on you.
+        You may end up losing a lot of progress
+         ")
+st.markdown('#') 
 
 # Create file upload field
 uploaded_file = st.file_uploader("Upload your zip folder here", type=['zip'], help='Upload a zip folder containing only PDF research articles')
