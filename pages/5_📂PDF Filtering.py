@@ -232,7 +232,7 @@ if st.session_state.pdf_filtered:
     st.plotly_chart(st.session_state.pdf_ind_fig1, use_container_width=True)
 
     # Display Key Themes
-    st.subheader("Key Themes [A little broken, will fix in the next patch]")
+    st.subheader("Key Themes")
     st.markdown(st.session_state.pdf_agg_fig)
 
     reupload_button = st.button('Ask another question')
