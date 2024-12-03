@@ -55,7 +55,7 @@ ctrl + c
 
 ```
 
-For more information please visit <a href= 'https://drive.google.com/file/d/1k0HyC_L48_ePKt85Qj-gdVRvASWIxHNr/view?usp=sharing'>here</a>
+For more information please visit <a href= 'https://drive.google.com/file/d/1k0HyC_L48_ePKt85Qj-gdVRvASWIxHNr/view?usp=sharing'>here [Dev note, this is outdated, to patch]</a>
 
 ## 📄 Pages
 

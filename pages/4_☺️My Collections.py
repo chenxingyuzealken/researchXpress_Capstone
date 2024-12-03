@@ -81,8 +81,10 @@ collection_name = st.text_input("Name of new Collection", placeholder='e.g. psyc
 st.markdown('##')
 
 guide2 = '''Put your pdf files in a folder and zip them up. 
-            I don't recommend doing it around 50 pdf per zip file. 
-            This is in case your internet craps out on you. You may end up losing a lot of progress
+            I don't recommend doing it more than 50 pdf per zip file. 
+            This is in case your internet craps out on you. You may end up losing a lot of progress.
+            You should assume that whatever is uploaded will not be retained beyond your current session (i.e., everytime you open this)
+            One practice is to just save multiple zip files with your pdfs in them, and upload them, download the excel and then consolidate your filtered pdfs in a new folder for pdf analysis
 
         '''
 
